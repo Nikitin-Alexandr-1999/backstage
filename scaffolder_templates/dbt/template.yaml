@@ -1,0 +1,85 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: dbt-project-template
+  title: Template of customizable dbt project
+  description: Template of dbt project which integrated with airflow to build ELT pipeline
+  tags:
+    - dbt
+    - elt
+spec:
+  # owner: user:guest
+  type: pipeline # service
+  parameters:
+    - title: Fill in some steps
+      required:
+        - name
+        - description
+        - owner
+        - repoUrl
+      properties:
+        name:
+          title: Name
+          type: string
+          description: Name of the backstage application in the catalog
+          ui:autofocus: true
+          ui:options:
+            rows: 5
+        description:
+          title: Description
+          type: string
+          description: The description of the backstage application
+          ui:options:
+            rows: 5
+        owner:
+          title: Owner
+          type: string
+          description: Select the owner of the backstage application being created (you can specify a specific user or group of users)
+          ui:field: OwnerPicker
+          ui:options:
+            allowedKinds:
+              - Group
+              - User
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - dp-demo.gitlab.yandexcloud.net
+
+  steps:
+    - id: fetch-base
+      name: Fetch Base
+      action: fetch:cookiecutter
+      input:
+        url: ./content
+        values:
+          project_name: ${{ parameters.name }}
+          project_description: ${{ parameters.description }}
+          owner_name: ${{ parameters.owner }}
+
+    - id: publish
+      name: Publish
+      action: publish:gitlab
+      input:
+        description: This is ${{ parameters.name }}
+        allowedHosts:
+          - dp-demo.gitlab.yandexcloud.net
+        repoUrl: ${{ parameters.repoUrl }}
+        defaultBranch: main
+
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
+        catalogInfoPath: '/backstage_meta/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Repository
+        url: ${{ steps['publish'].output.remoteUrl }}
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}

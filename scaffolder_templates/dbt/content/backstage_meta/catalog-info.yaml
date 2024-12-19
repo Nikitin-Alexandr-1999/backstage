@@ -1,0 +1,9 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: "{{ cookiecutter.project_name }}"
+  description: "{{ cookiecutter.project_description }}"
+spec:
+  owner: "{{ cookiecutter.owner_name }}"
+  type: pipeline
+  lifecycle: production
