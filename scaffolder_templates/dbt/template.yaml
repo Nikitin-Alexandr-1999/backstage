@@ -58,6 +58,8 @@ spec:
           project_name: ${{ parameters.name }}
           project_description: ${{ parameters.description }}
           owner_name: ${{ parameters.owner }}
+        copyWithoutRender:
+          - .gitlab-ci.yml
 
     - id: publish
       name: Publish
