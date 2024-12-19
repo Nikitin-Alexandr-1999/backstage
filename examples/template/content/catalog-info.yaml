@@ -1,0 +1,8 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: {{ cookiecutter.project_name }} # cookiecutter is using jinja2 templates
+spec:
+  type: service
+  owner: user:guest
+  lifecycle: experimental
