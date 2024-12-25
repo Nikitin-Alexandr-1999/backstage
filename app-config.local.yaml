@@ -1,0 +1,68 @@
+---
+app:
+  title: NeoFlex Backstage App
+  baseUrl: ${BACKSTAGE_APP_PROTOCOL}://${BACKSTAGE_APP_HOST}:${BACKSTAGE_APP_PORT}
+
+organization:
+  name: NeoFlex
+
+backend:
+  baseUrl: ${BACKSTAGE_BACKEND_PROTOCOL}://${BACKSTAGE_BACKEND_HOST}:${BACKSTAGE_BACKEND_PORT}
+  listen:
+    port: ${BACKSTAGE_BACKEND_PORT}
+  csp:
+    connect-src: ["'self'", 'http:', 'https:']
+    upgrade-insecure-requests: false
+  cors:
+    origin: '${BACKSTAGE_BACKEND_PROTOCOL}://${BACKSTAGE_BACKEND_HOST}:*'
+    methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
+    credentials: true
+  database:
+    client: pg
+    connection:
+      host: ${POSTGRES_HOST}
+      port: ${POSTGRES_PORT}
+      user: ${POSTGRES_USER}
+      password: ${POSTGRES_PASSWORD}
+
+auth:
+  environment: development
+  experimentalExtraAllowedOrigins:
+    - 'http://backstage.dp.lab.yandexcloud.net:3000'
+  providers:
+    gitlab:
+      development:
+        clientId: '${AUTH_GITLAB_CLIENT_ID}'
+        clientSecret: '${AUTH_GITLAB_CLIENT_SECRET}'
+        audience: '${GITLAB_PROTOCOL}://${GITLAB_HOST}'
+        callbackUrl: '${BACKSTAGE_BACKEND_PROTOCOL}://${BACKSTAGE_BACKEND_HOST}:7007/api/auth/gitlab/handler/frame'
+
+integrations:
+  gitlab:
+    - host: '${GITLAB_HOST}'
+      token: '${GITLAB_TOKEN}'
+      baseUrl: '${GITLAB_PROTOCOL}://${GITLAB_HOST}'
+      apiBaseUrl: '${GITLAB_PROTOCOL}://${GITLAB_HOST}/api/v4'
+
+catalog:
+  import:
+    entityFilename: catalog-info.yaml
+    pullRequestBranchName: backstage-integration
+  rules:
+    - allow: [Component, System, API, Resource, Location, User, Group]
+  locations:
+    - type: url
+      target: ${GITLAB_PROTOCOL}://${GITLAB_HOST}/${BS_TEMPLATE_FILE_GITLAB_BLOB_PATH}
+      rules:
+        - allow: [Template]
+
+    # - type: file
+    #   target: /home/admin/backstage/app/examples/entities.yaml
+    # - type: file
+    #   target: /home/admin/backstage/app/examples/template/template.yaml
+    #   rules:
+    #     - allow: [Template]
+    # - type: file
+    #   target: /home/admin/backstage/app/examples/org.yaml
+    #   rules:
+    #     - allow: [User, Group]
